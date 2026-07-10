@@ -1,0 +1,63 @@
+funcprot(0);
+clear;
+clc;
+clf;
+
+k = 160;
+b = 10;
+m = 940;
+hbar = 197.3;
+
+c1 = 2*m/(hbar*hbar);
+c2 = -2*m/(hbar*hbar);
+
+ri = 0.00001;
+rf = 5;
+dr = 0.05;
+
+r = ri:dr:rf;
+n = length(r);
+
+u0 = [0;1];
+
+E1 = 90;
+E2 = 120;
+
+function du = f(r,u,E)
+
+    du(1) = u(2);
+
+    V = (k*r^2)/2 + (b*r^3)/3;
+
+    du(2) = (c1*V + c2*E)*u(1);
+
+endfunction
+
+for i = 1:100
+
+    Em = (E1 + E2)/2;
+
+    u1 = ode(u0,ri,r,list(f,E1));
+    um = ode(u0,ri,r,list(f,Em));
+
+    if u1(1,n)*um(1,n) < 0 then
+        E2 = Em;
+    else
+        E1 = Em;
+    end
+
+end
+
+disp("Ground State Energy (MeV)");
+disp(Em);
+
+plot(r,um(1,:),"b");
+
+xtitle("Anharmonic Oscillator using ODE Method",...
+       "r (fm)",...
+       "Wave Function");
+
+a = gca();
+a.box = "on";
+a.thickness = 2;
+a.children.children.thickness = 2;
